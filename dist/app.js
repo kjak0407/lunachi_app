@@ -17,6 +17,9 @@ const games = [
   { id: 'peekaboo', name: 'いないばあ', fullName: 'いないいないばあ', art: 7, color: '#e8dff0' },
   { id: 'fruit', name: 'くだもの', fullName: 'くだものどうぞ', art: 10, color: '#f3dce0' },
   { id: 'water', name: 'おみず', fullName: 'おみずちゃぷちゃぷ', art: 13, color: '#daebed' },
+  { id: 'explore', name: 'たんけん', fullName: 'ぴかぴか たんけん', newArt: 0, color: '#e3dff4' },
+  { id: 'blocks', name: 'つみき', fullName: 'つみき どーん！', newArt: 1, color: '#e0ecdf' },
+  { id: 'cooking', name: 'おりょうり', fullName: 'おりょうり じゅうじゅう', newArt: 2, color: '#fae4cf' },
 ];
 let preferences = { enabled: true, volume: 60, musicEnabled: true, musicVolume: 35, shuffleSeconds: 60 };
 try {
@@ -117,9 +120,10 @@ async function playSound(id) {
   // A newer tap, home navigation, mute or backgrounding cancels this sound.
   const onAnimalScreen = !$('animals').hidden;
   const onPeekabooScreen = !$('toy-game').hidden && $('toy-game').classList.contains('peekaboo-screen');
+  const onExploreScreen = !$('toy-game').hidden && $('toy-game').classList.contains('explore-screen');
   const vehicleSound = vehicleCatalog.some(vehicle => vehicle.id === id);
   const onVehicleScreen = !$('toy-game').hidden && $('toy-game').classList.contains('vehicles-screen');
-  const onMatchingScreen = vehicleSound ? onVehicleScreen : (onAnimalScreen || onPeekabooScreen);
+  const onMatchingScreen = vehicleSound ? onVehicleScreen : (onAnimalScreen || onPeekabooScreen || onExploreScreen);
   if (request !== playRequest || !preferences.enabled || preferences.volume === 0 || document.hidden || !onMatchingScreen) return;
   currentSoundStatus().textContent = '';
   const source = audio.createBufferSource();
@@ -148,7 +152,7 @@ for (let p = 0; p < pageCount; p++) {
     button.dataset.game = game.id;
     button.setAttribute('aria-label', `${game.fullName}で遊ぶ`);
     const artPosition = `${game.art % 4 / 3 * 100}% ${Math.floor(game.art / 4) / 3 * 100}%`;
-    button.innerHTML = `<span class="tile-art">${game.id === 'animals' ? '<span class="animal-portrait" style="--position:0% 0%;width:95%" aria-hidden="true"></span>' : `<span class="toy-art" style="--toy-position:${artPosition}" aria-hidden="true"></span>`}</span>`;
+    button.innerHTML = `<span class="tile-art">${game.id === 'animals' ? '<span class="animal-portrait" style="--position:0% 0%;width:95%" aria-hidden="true"></span>' : game.newArt !== undefined ? `<span class="new-play-art" style="--new-position:${game.newArt % 3 * 50}% ${Math.floor(game.newArt / 3) * 50}%" aria-hidden="true"></span>` : `<span class="toy-art" style="--toy-position:${artPosition}" aria-hidden="true"></span>`}</span>`;
     button.addEventListener('click', () => openPlayroomGame(game.id));
     grid.append(button);
   });
@@ -178,7 +182,12 @@ function setPage(next) {
     dot.classList.toggle('active', index === page);
     dot.setAttribute('aria-current', index === page ? 'page' : 'false');
   });
+  $('home-page-number').textContent = `${page + 1} / ${pageCount}`;
+  $('previous-page').disabled = page === 0;
+  $('next-page').disabled = page === pageCount - 1;
 }
+$('previous-page').addEventListener('click', () => setPage(page - 1));
+$('next-page').addEventListener('click', () => setPage(page + 1));
 setPage(0);
 let swipeStart;
 $('home-pages').addEventListener('pointerdown', (e) => { swipeStart = { x: e.clientX, y: e.clientY }; });

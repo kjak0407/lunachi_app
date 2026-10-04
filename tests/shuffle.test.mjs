@@ -14,7 +14,7 @@ function setup() {
     addEventListener(name,fn){events[name] = fn;}, querySelectorAll(){return [node('manual-game')];}};
   const preferences = {shuffleSeconds:60};
   const context = vm.createContext({$:node,document,preferences,Math,performance:{now:()=>now},
-    games:['animals','piano','balloons','vehicles','drums','drawing','peekaboo','fruit','water'].map(id => ({id})),
+    games:['animals','piano','balloons','vehicles','drums','drawing','peekaboo','fruit','water','explore','blocks','cooking'].map(id => ({id})),
     openPlayroomGame(id){visits.push(id);}, syncSettings(){}, window:{addEventListener(){}},
     setTimeout(fn,delay){const id = ++timerId; timers.set(id,{fn,delay}); return id;}, clearTimeout(id){timers.delete(id);},
   });
@@ -24,12 +24,12 @@ function setup() {
     advance(){assert.equal(timers.size,1); const [id,timer] = [...timers][0]; timers.delete(id); now += timer.delay; timer.fn();}};
 }
 
-test('Shuffle starts immediately, visits all nine once, and avoids repeats between rounds',()=>{
+test('Shuffle starts immediately, visits all twelve once, and avoids repeats between rounds',()=>{
   const h = setup(); h.node('shuffle-button').listeners.click();
   assert.equal(h.visits.length,1); assert.equal([...h.timers.values()][0].delay,60000);
-  for(let i=0;i<8;i++) h.advance();
-  assert.equal(new Set(h.visits).size,9);
-  h.advance(); assert.notEqual(h.visits[8],h.visits[9]);
+  for(let i=0;i<11;i++) h.advance();
+  assert.equal(new Set(h.visits).size,12);
+  h.advance(); assert.notEqual(h.visits[11],h.visits[12]);
   h.node('toy-home').listeners.click(); assert.equal(h.timers.size,0);
 });
 

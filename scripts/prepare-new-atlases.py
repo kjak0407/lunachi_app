@@ -2,9 +2,10 @@
 from pathlib import Path
 from PIL import Image
 import numpy as np
+import sys
 
 root = Path(__file__).resolve().parents[1]
-for name in ['vehicles-v2', 'instruments-v2']:
+for name in (sys.argv[1:] or ['vehicles-v2', 'instruments-v2']):
     source = root / '.tools' / (name + '-source.png')
     if not source.exists():
         source.write_bytes((root / 'dist/assets' / (name + '.png')).read_bytes())

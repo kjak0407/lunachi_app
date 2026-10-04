@@ -34,16 +34,16 @@ function setup() {
   };
 }
 
-test('No autoplay; start home music, then switch all nine games and return home',async()=>{
+test('No autoplay; start home music, then switch all twelve games and return home',async()=>{
   const h=setup();assert.equal(h.requests.length,0);h.start();
   assert.equal(h.requests[0].url,'assets/bgm/home.wav');h.requests[0].complete();await h.settle();
   assert.equal(h.document.body.dataset.bgmState,'playing');
-  for(const id of ['animals','piano','balloons','vehicles','drums','drawing','peekaboo','fruit','water']){
+  for(const id of ['animals','piano','balloons','vehicles','drums','drawing','peekaboo','fruit','water','explore','blocks','cooking']){
     const previous=h.sources.at(-1);h.navigate(id);assert.equal(previous.stopped,true);
     assert.equal(h.requests.at(-1).url,`assets/bgm/${id}.wav`);h.requests.at(-1).complete();await h.settle();
     assert.equal(h.sources.at(-1).loop,true);assert.equal(h.document.body.dataset.bgmTrack,id);
   }
-  h.navigate('home');await h.settle();assert.equal(h.requests.length,10);
+  h.navigate('home');await h.settle();assert.equal(h.requests.length,13);
   assert.equal(h.document.body.dataset.bgmTrack,'home');assert.equal(h.document.body.dataset.bgmState,'playing');
 });
 test('Rapid navigation and backgrounding cancel in-flight music',async()=>{

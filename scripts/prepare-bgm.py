@@ -1,6 +1,7 @@
 """Compose ten original, seamlessly looping instrumental tracks; no third-party audio."""
 from pathlib import Path
 import wave
+import sys
 import numpy as np
 
 RATE = 22050
@@ -18,12 +19,17 @@ TRACKS = {
  'peekaboo': (164, 65, 'bell', [0,-1,2,-1,4,2,0,-1,5,-1,4,-1,2,1,0,-1,7,9,7,-1,5,4,2,-1,1,-1,2,4,0,-1,0,-1]),
  'fruit': (168, 60, 'piano', [4,4,2,0,2,4,7,-1,5,5,4,2,4,5,9,-1,7,5,4,2,5,4,2,1,2,4,1,2,0,-1,0,-1]),
  'water': (160, 65, 'bell', [7,-1,4,-1,2,4,5,-1,9,-1,5,-1,4,2,1,-1,4,-1,7,-1,9,7,5,4,2,-1,1,-1,0,-1,0,-1]),
+ 'explore': (162, 67, 'bell', [0,4,2,7,5,2,4,0,1,5,4,9,7,4,2,1,2,7,4,9,5,4,2,0,4,2,1,5,4,2,0,-1]),
+ 'blocks': (174, 60, 'wood', [0,0,2,2,4,4,7,4,1,1,3,3,5,5,9,5,2,2,4,4,7,5,4,2,4,2,1,2,0,7,0,-1]),
+ 'cooking': (168, 64, 'piano', [0,4,2,4,7,4,2,0,1,5,3,5,9,5,4,1,2,7,4,7,9,7,5,2,4,5,4,2,1,2,0,-1]),
 }
 SCALE = [0,2,4,5,7,9,11]
 def pitch(root, degree):
     return 440 * 2 ** ((root + SCALE[degree % 7] + 12*(degree//7) - 69)/12)
 
 for name, (bpm, root, instrument, melody) in TRACKS.items():
+    if len(sys.argv) > 1 and name not in sys.argv[1:]:
+        continue
     beat = 60/bpm
     length = round(32*beat*RATE)
     mix = np.zeros(length, dtype=np.float64)

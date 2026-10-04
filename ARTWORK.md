@@ -5,6 +5,9 @@
 - 乗り物：`dist/assets/vehicles-v2.png`
 - 楽器：`dist/assets/instruments-v2.png`
 - 時間帯のホーム背景：`dist/assets/home-morning.jpg`、`home-day.jpg`、`home-night.jpg`
+- 新しい遊び：`dist/assets/new-play.png`
+
+新しい遊びの生成指定：３×３、透明背景、丸い立体的なパステル色の粘土・木製玩具とリアルな食品のイラスト。上段は紫色の懐中電灯・笑顔の積み木の塔・目玉焼き入りのフライパン。中段は星の入った宝箱・割れた卵・食パン。下段はブロッコリーと人参・完成した卵トーストの皿・星模様のピンクの木製キューブ。文字と枠なし。組み込みImageGenで生成し、`scripts/prepare-new-play.py` で全体の輪郭を保って各セルに配置。
 
 ホーム背景の生成指定：３枚の縦長スマホ壁紙を横に並べた同じ画風の絵本・粘土・紙風イラスト。朝は桃色とクリームの朝焼け、昼は淡い青空、夜は青紫色の空に三日月と星。上端に小さな太陽や雲、下端に同じ形の丘と花。アイコンを重ねる中央75%は静かな空とし、文字・動物・UI・枠を入れない。`scripts/prepare-home-backgrounds.py` で３枚に分割してJPEGに保存。
 
