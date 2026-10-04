@@ -39,12 +39,14 @@ Privateのコード保存を希望する場合はチェックを付けたまま�
 
 1. ブラウザのリポジトリ画面で **Settings → Pages** を開きます。
 2. **Build and deployment → Source** を **GitHub Actions** にします。
-3. **Actions** タブを開き、左側の **Publish playroom to GitHub Pages** を選びます。
+3. ページ上部まで戻り、**Code / Issues / Pull requests / Actions / Settings** と並んでいる、**上部のActionsタブ**をクリックします。Settingsの左側にある **Actions → General** は権限設定で、別の画面です。上部のActionsタブを開いたら、左側の **Publish playroom to GitHub Pages** を選びます。
 4. **Run workflow** を押し、通常のメインブランチを選んで実行します。
 5. 緑色のチェックが付いたら **Settings → Pages** に戻ります。
 6. 表示された **Visit site** を開きます。そのURLを家族に共有してください。
 
 公開先は一般に `https://アカウント名.github.io/リポジトリ名/` です。正確なURLは **Visit site** に表示されたものを使います。
+
+上部のActionsタブでもワークフロー名が見つからない場合は、GitHubの **Code** タブで `.github/workflows/pages.yml` があるか確認してください。PCにはこのファイルを用意しています。まだGitHubに送られていない場合は、GitHub Desktopで変更をCommitし、**Push origin** を押します。**Run workflow** の手動実行には、このファイルがリポジトリのデフォルトブランチに存在する必要があります。
 
 公開用の設定は `.github/workflows/pages.yml` に用意済みです。アップロードするのは `dist` の中だけです。PCのプレビューサーバーや加工用の素材はサイトには含めません。
 
