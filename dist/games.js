@@ -85,6 +85,13 @@ function toySound(kind, value = 0) {
     voice.tone(notes[value], 1.1, 0, .22);
     voice.tone(notes[value] * 2, .65, 0, .055);
     voice.tone(notes[value] * 3, .25, 0, .018);
+  } else if (kind === 'balloon-pop') {
+    // A louder pressure crack with a longer, decaying air/reverberation tail.
+    voice.noise(.055, 0, .68, 5700, .25, .0003);
+    voice.noise(.32, .001, .55, 2000, .3, .0005);
+    voice.tone(115, .16, 0, .28, 'sine', 42);
+    voice.noise(.43, .055, .17, 1300, .4, .002);
+    voice.noise(.32, .115, .08, 2700, .3, .002);
   } else if (kind === 'pop') {
     // A sharp latex snap, a short air burst and a low pressure impulse.
     voice.noise(.035, 0, .34, 6200, .25, .0003);

@@ -1,20 +1,31 @@
-// Visit every play space once per shuffled round; suspend while backgrounded.
+// Fixed deadlines: tapping, dragging and playing never extend a game's time.
 let shuffleActive = false;
 let shuffleTimer = null;
 let shuffleBag = [];
 let shufflePrevious = null;
+let shuffleDeadline = 0;
 
 function stopShuffle() {
   shuffleActive = false;
   clearTimeout(shuffleTimer); shuffleTimer = null;
   shuffleBag = [];
+  shuffleDeadline = 0;
   document.body.classList.remove('shuffle-playing');
 }
 
-function scheduleShuffle() {
+function scheduleShuffle(resetDeadline = false) {
   clearTimeout(shuffleTimer); shuffleTimer = null;
+  if (resetDeadline) shuffleDeadline = performance.now() + preferences.shuffleSeconds * 1000;
   if (!shuffleActive || document.hidden) return;
-  shuffleTimer = setTimeout(nextShuffleGame, preferences.shuffleSeconds * 1000);
+  const remaining = shuffleDeadline - performance.now();
+  if (remaining <= 0) { nextShuffleGame(); return; }
+  shuffleTimer = setTimeout(() => { shuffleTimer = null; checkShuffleDeadline(); }, remaining);
+}
+
+function checkShuffleDeadline() {
+  if (!shuffleActive || document.hidden) return;
+  if (performance.now() >= shuffleDeadline) nextShuffleGame();
+  else if (shuffleTimer === null) scheduleShuffle();
 }
 
 function nextShuffleGame() {
@@ -32,7 +43,7 @@ function nextShuffleGame() {
   }
   shufflePrevious = shuffleBag.pop();
   openPlayroomGame(shufflePrevious);
-  scheduleShuffle();
+  scheduleShuffle(true);
 }
 
 $('shuffle-button').addEventListener('click', () => {
@@ -44,8 +55,12 @@ for (const id of ['back-home', 'toy-home']) $(id).addEventListener('click', stop
 document.querySelectorAll('[data-game]').forEach(button => button.addEventListener('click', stopShuffle, {capture:true}));
 $('shuffle-seconds').addEventListener('input', event => {
   preferences.shuffleSeconds = Math.round(Math.max(10, Math.min(300, Number(event.target.value))) / 10) * 10;
-  syncSettings(); scheduleShuffle();
+  syncSettings(); scheduleShuffle(true);
 });
-document.addEventListener('visibilitychange', scheduleShuffle);
+// Also check during a held touch, in case the browser delays a timer callback.
+for (const event of ['pointerdown', 'pointermove', 'pointerup', 'keydown']) {
+  document.addEventListener(event, checkShuffleDeadline, {capture:true, passive:true});
+}
+document.addEventListener('visibilitychange', () => scheduleShuffle());
 window.addEventListener('pagehide', () => { clearTimeout(shuffleTimer); shuffleTimer = null; });
-window.addEventListener('pageshow', scheduleShuffle);
+window.addEventListener('pageshow', () => scheduleShuffle());

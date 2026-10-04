@@ -83,7 +83,7 @@ toyBuilders.balloons = (scope) => {
       popped = true;
       const a = button.getBoundingClientRect(), b = stage.getBoundingClientRect();
       button.classList.add('popped'); button.disabled = true;
-      toySound('pop');
+      toySound('balloon-pop');
       const x = a.left + a.width / 2 - b.left, y = a.top + a.height * .35 - b.top;
       const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       const ring = document.createElement('span');
