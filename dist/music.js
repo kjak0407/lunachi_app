@@ -1,21 +1,10 @@
 // Original local WAV loops share the existing audio output, but have their own level.
 const musicBuffers = new Map();
 let musicStarted = false, musicVoice = null, musicLoading = null, musicRequest = 0;
-let musicDuckUntil = 0, musicDuckTimer;
 
 function musicLevel() {
   const screenLevel = musicScreen() === 'piano' ? .4 : 1;
-  return preferences.musicVolume / 100 * .85 * .6 * screenLevel * (audio.currentTime < musicDuckUntil ? .32 : 1);
-}
-
-// Let taps stand out even with a much more energetic soundtrack.
-function duckMusic(duration = .6) {
-  if (!musicVoice || !audio) return;
-  musicDuckUntil = Math.max(musicDuckUntil, audio.currentTime + duration);
-  musicVoice.gain.gain.cancelScheduledValues(audio.currentTime);
-  musicVoice.gain.gain.setTargetAtTime(musicLevel(), audio.currentTime, .015);
-  clearTimeout(musicDuckTimer);
-  musicDuckTimer = setTimeout(() => syncMusic(), (musicDuckUntil - audio.currentTime) * 1000 + 40);
+  return preferences.musicVolume / 100 * .85 * .6 * screenLevel;
 }
 
 function musicScreen() {
@@ -32,11 +21,10 @@ function musicState(state, track = musicScreen()) {
   const button = $('home-music');
   button.setAttribute('aria-pressed', String(playing));
   button.setAttribute('aria-label', playing ? 'BGMを止める' : 'BGMを再生する');
-  button.textContent = playing ? '♪ おんがくを とめる' : '♪ おんがくを はじめる';
+  button.innerHTML = `<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M14 7v15a4 4 0 1 1-3-4V10l14-3v12a4 4 0 1 1-3-4V3Z" fill="#b29ac8"/>${playing ? '' : '<path d="m6 5 22 23" stroke="#896b60" stroke-width="2.5" stroke-linecap="round"/>'}</svg>`;
 }
 
 function stopMusic() {
-  clearTimeout(musicDuckTimer); musicDuckUntil = 0;
   musicRequest++;
   musicLoading = null;
   const previous = musicVoice;

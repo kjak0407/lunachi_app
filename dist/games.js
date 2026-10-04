@@ -80,7 +80,6 @@ function toyVoice(duration = .6) {
 function toySound(kind, value = 0) {
   const voice = toyVoice();
   if (!voice) return;
-  if (typeof duckMusic === 'function') duckMusic(.6);
   const notes = [261.63, 293.66, 329.63, 349.23, 392, 440, 493.88];
   if (kind === 'piano') {
     voice.tone(notes[value], 1.1, 0, .22);
@@ -156,7 +155,7 @@ function burstAt(scope, element, color, symbols) {
 const toyInfo = {
   piano: ['すきな おとを ならしてみよう', 'ゆびを すべらせても ひけるよ', '#f2eafa'],
   balloons: ['ふうせんの なかは なあに？', 'ふうせんを さわってみてね', '#edf5fb'],
-  vehicles: ['どの のりものに しよう？', 'さわると うごくよ。やじるしで つぎへ！', '#edf4e4'],
+  vehicles: ['どの のりものに しよう？', 'さわると うごくよ。したにも のりものが いるよ！', '#edf4e4'],
   drums: ['いろんな おとを ならそう♪', 'すきな がっきを さわってみてね', '#fff1de'],
   drawing: ['ゆびで きらきら おえかき', 'ペンも スタンプも つかってみよう', '#f7f4ee'],
   peekaboo: ['だれが かくれているかな？', 'さわると、いないいないばあ！', '#e7efd8'],
@@ -238,25 +237,20 @@ const toyBuilders = {
       lane.className = `vehicle-lane ${vehicle.id}-lane ${vehicle.sky ? 'sky-lane' : 'road-lane'}`; lane.setAttribute('aria-label', `${vehicle.name}を${vehicle.sky ? '飛ばす' : '走らせる'}`);
       lane.innerHTML = `<span class="vehicle-actor">${vehicleArt(vehicle)}</span><span class="vehicle-name">${vehicle.name}</span><span class="vehicle-call" aria-hidden="true">${vehicle.sound}</span>`;
       lanes.append(lane);
-      scope.tap(lane, () => {
+      let touchStart;
+      scope.on(lane, 'pointerdown', e => { if (e.button === 0) touchStart = { x: e.clientX, y: e.clientY }; });
+      const playVehicle = () => {
         playSound(vehicle.id);
         lane.style.setProperty('--travel', `${Math.max(20, lane.clientWidth - 140)}px`);
         animateToy(lane, 'running');
+      };
+      scope.on(lane, 'pointerup', e => {
+        if (touchStart && Math.hypot(e.clientX - touchStart.x, e.clientY - touchStart.y) < 12) playVehicle();
+        touchStart = null;
       });
+      scope.on(lane, 'pointercancel', () => { touchStart = null; });
+      scope.on(lane, 'click', e => { if (e.detail === 0) playVehicle(); });
     });
-    const pager = document.createElement('nav'); pager.className = 'vehicle-pager'; pager.setAttribute('aria-label', 'のりもののページ');
-    pager.innerHTML = '<button type="button" aria-label="まえののりもの">‹</button><span class="vehicle-page-label" aria-live="polite"></span><button type="button" aria-label="つぎののりもの">›</button>';
-    stage.append(pager);
-    let page = 0;
-    const buttons = [...lanes.children], total = Math.ceil(vehicleCatalog.length / 3);
-    const showPage = () => {
-      stopSound();
-      buttons.forEach((button, i) => { button.hidden = Math.floor(i / 3) !== page; button.classList.remove('running'); });
-      pager.querySelector('span').textContent = `${['まち・せんろ・うみ', 'そらと バス', 'はたらく くるま'][page]}　${page + 1} / ${total}`;
-    };
-    scope.on(pager.firstElementChild, 'click', () => { page = (page + total - 1) % total; showPage(); });
-    scope.on(pager.lastElementChild, 'click', () => { page = (page + 1) % total; showPage(); });
-    showPage();
   },
 
   drums(scope) {

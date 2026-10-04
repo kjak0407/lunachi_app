@@ -65,10 +65,13 @@ test('Music mute, global mute, zero volume and level changes control active sour
   }
   h.preferences.enabled=false;h.context.syncMusic();assert.equal(h.sources.at(-1).stopped,true);
 });
-test('Effects briefly lower energetic music, and music returns to its selected level',async()=>{
+test('Music stays at the selected level over time; piano keeps its quieter screen level',async()=>{
   const h=setup();h.start();h.requests[0].complete();await h.settle();
-  h.context.duckMusic(.6);assert.equal(h.levels.at(-1),.35*.85*.6*.32);
+  assert.equal(typeof h.context.duckMusic,'undefined');
+  assert.equal(h.levels.at(-1),.35*.85*.6);
   h.context.audio.currentTime=2;h.context.syncMusic();assert.equal(h.levels.at(-1),.35*.85*.6);
+  h.navigate('piano');h.requests.at(-1).complete();await h.settle();
+  assert.equal(h.levels.at(-1),.35*.85*.6*.4);
   h.preferences.enabled=false;h.context.syncMusic();
 });
 

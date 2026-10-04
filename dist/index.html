@@ -6,9 +6,9 @@
   <meta name="theme-color" content="#fbf7ef">
   <meta name="robots" content="noindex, nofollow, noarchive">
   <meta name="description" content="タップすると音と動きが返ってくる、ちいさな子どものための遊び場。">
-  <title>ちいさな あそびば</title>
+  <title>るなちのあそびば</title>
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
-  <meta name="apple-mobile-web-app-title" content="あそびば">
+  <meta name="apple-mobile-web-app-title" content="るなちのあそびば">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%23f9dccb'/%3E%3Ccircle cx='32' cy='34' r='19' fill='%23b58261'/%3E%3Ccircle cx='17' cy='20' r='9' fill='%23b58261'/%3E%3Ccircle cx='47' cy='20' r='9' fill='%23b58261'/%3E%3Ccircle cx='25' cy='31' r='2' fill='%23403935'/%3E%3Ccircle cx='39' cy='31' r='2' fill='%23403935'/%3E%3Cellipse cx='32' cy='40' rx='5' ry='4' fill='%23403935'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="games.css">
@@ -24,24 +24,22 @@
   <main class="app">
     <section id="home" class="screen home" aria-labelledby="home-title">
       <header class="home-header">
-        <span class="brand">LUNACHI <span>PLAYROOM</span></span>
-        <button id="settings-button" class="circle-button" aria-label="保護者向け設定。長押しで開きます" title="長押しで設定">⚙</button>
+        <button id="home-music" class="circle-button home-music" aria-label="BGMを再生する" aria-pressed="false"></button>
+        <button id="settings-button" class="circle-button" aria-label="保護者向け設定を開く" title="音量設定"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 5c5-7 12-1 8 5 8 0 9 10 2 12 2 8-8 12-12 5-6 5-14-3-8-9-7-4-2-13 5-10 0-5 3-6 5-3Z" fill="#e9b7c7"/><circle cx="16" cy="17" r="7" fill="#fff2ce"/><circle cx="14" cy="16" r="1" fill="#896b60"/><circle cx="19" cy="16" r="1" fill="#896b60"/><path d="M14 20q3 3 5 0" fill="none" stroke="#896b60" stroke-width="1.5" stroke-linecap="round"/></svg></button>
       </header>
-      <div class="welcome"><span class="little-sun" aria-hidden="true">☀</span><p class="eyebrow">おとと、いろと、わくわく。</p><h1 id="home-title">ちいさな <span>あそびば</span></h1><p>きょうは なにして あそぼう？</p></div>
-      <button id="home-music" class="home-music" aria-label="BGMを再生する" aria-pressed="false">♪ おんがくを はじめる</button>
+      <div class="welcome"><h1 id="home-title">るなちのあそびば</h1></div>
       <div id="home-pages" class="home-pages" aria-label="遊びを選ぶ"></div>
       <div id="page-dots" class="page-dots" aria-label="ホームのページ"></div>
-      <footer class="home-footer"><span class="footer-flower" aria-hidden="true">✿</span><p>ちいさな ゆびで、おおきな はっけん。</p><small>９つのあそび。すきなものを さわってみてね。</small><small>保護者の方へ：右上の ⚙ を長押しすると音を調整できます。</small></footer>
     </section>
     <section id="toy-game" class="screen play-screen" aria-labelledby="toy-title" hidden>
-      <header class="game-header"><button id="toy-home" class="circle-button" aria-label="ホームに戻る"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7M5 9v11h14V9M9 20v-7h6v7"/></svg></button><div><p class="eyebrow">ちいさな あそびば</p><h1 id="toy-title"></h1></div><button id="toy-mute" class="circle-button" aria-label="音をオフにする" aria-pressed="false"></button></header>
+      <header class="game-header"><button id="toy-home" class="circle-button" aria-label="ホームに戻る"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7M5 9v11h14V9M9 20v-7h6v7"/></svg></button><div><p class="eyebrow">るなちのあそびば</p><h1 id="toy-title"></h1></div><button id="toy-mute" class="circle-button" aria-label="音をオフにする" aria-pressed="false"></button></header>
       <p id="toy-hint" class="game-hint"></p>
       <div id="toy-stage" class="toy-stage"></div>
       <footer id="toy-footer" class="game-footer"></footer>
       <p id="toy-status" class="sound-status" role="status"></p>
     </section>
     <section id="animals" class="screen animal-screen" aria-labelledby="animal-title" hidden>
-      <header class="game-header"><button id="back-home" class="circle-button" aria-label="ホームに戻る"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7M5 9v11h14V9M9 20v-7h6v7"/></svg></button><div><p class="eyebrow">ちいさな あそびば</p><h1 id="animal-title">どうぶつのおしゃべり</h1></div><button id="mute-button" class="circle-button" aria-label="音をオフにする" aria-pressed="false"></button></header>
+      <header class="game-header"><button id="back-home" class="circle-button" aria-label="ホームに戻る"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7M5 9v11h14V9M9 20v-7h6v7"/></svg></button><div><p class="eyebrow">るなちのあそびば</p><h1 id="animal-title">どうぶつのおしゃべり</h1></div><button id="mute-button" class="circle-button" aria-label="音をオフにする" aria-pressed="false"></button></header>
       <p class="game-hint">だれと おしゃべり しよう？</p>
       <div id="animal-meadow" class="animal-meadow" aria-label="草原のどうぶつたち"></div>
       <footer class="game-footer"><span aria-hidden="true">✿</span> どうぶつを さわってみてね <span aria-hidden="true">✿</span></footer>

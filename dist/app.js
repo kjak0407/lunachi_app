@@ -131,7 +131,6 @@ async function playSound(id) {
     source.disconnect(); gain.disconnect();
     if (activeVoice === voice) activeVoice = null;
   };
-  if (typeof duckMusic === 'function') duckMusic(buffer.duration + .1);
   source.start();
 }
 
@@ -237,22 +236,13 @@ $('back-home').addEventListener('click', () => {
   if (!preferences.enabled) stopSound();
   syncSettings();
 });
-let holdTimer, holdStart;
 const settings = $('settings-button');
-const cancelHold = () => { clearTimeout(holdTimer); holdStart = null; };
-settings.addEventListener('pointerdown', (e) => {
-  if (e.button !== 0) return;
-  cancelHold();
-  holdStart = { x: e.clientX, y: e.clientY };
-  settings.setPointerCapture(e.pointerId);
-  holdTimer = setTimeout(() => { stopSound(); $('settings-dialog').showModal(); cancelHold(); }, 850);
-});
-settings.addEventListener('pointermove', (e) => {
-  if (holdStart && Math.hypot(e.clientX - holdStart.x, e.clientY - holdStart.y) > 12) cancelHold();
-});
-['pointerup', 'pointercancel', 'lostpointercapture'].forEach((name) => settings.addEventListener(name, cancelHold));
 settings.addEventListener('contextmenu', (e) => e.preventDefault());
-settings.addEventListener('click', (e) => { if (e.detail === 0) { stopSound(); $('settings-dialog').showModal(); } });
+settings.addEventListener('click', () => {
+  stopSound();
+  if (typeof stopToySounds === 'function') stopToySounds();
+  if (!$('settings-dialog').open) $('settings-dialog').showModal();
+});
 $('sound-enabled').addEventListener('change', (e) => { preferences.enabled = e.target.checked; if (!preferences.enabled) stopSound(); syncSettings(); });
 $('volume').addEventListener('input', (e) => { preferences.volume = Number(e.target.value); if (preferences.volume === 0) stopSound(); syncSettings(); });
 document.addEventListener('visibilitychange', () => { if (document.hidden) stopSound(); });
