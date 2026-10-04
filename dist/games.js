@@ -51,7 +51,7 @@ function toyVoice(duration = .6) {
       sources.push(source);
       source.start(now + offset); source.stop(now + offset + length + .01);
     },
-    noise(length = .2, offset = 0, volume = .2, center = 1200, q = .6) {
+    noise(length = .2, offset = 0, volume = .2, center = 1200, q = .6, attack = .008) {
       if (!noiseBuffer) {
         noiseBuffer = audio.createBuffer(1, audio.sampleRate * 2, audio.sampleRate);
         const data = noiseBuffer.getChannelData(0);
@@ -61,7 +61,7 @@ function toyVoice(duration = .6) {
       source.buffer = noiseBuffer;
       filter.type = 'bandpass'; filter.frequency.value = center; filter.Q.value = q;
       envelope.gain.setValueAtTime(0, now + offset);
-      envelope.gain.linearRampToValueAtTime(volume, now + offset + .008);
+      envelope.gain.linearRampToValueAtTime(volume, now + offset + attack);
       envelope.gain.exponentialRampToValueAtTime(.0001, now + offset + length);
       source.connect(filter).connect(envelope).connect(output);
       remaining++;
@@ -86,7 +86,10 @@ function toySound(kind, value = 0) {
     voice.tone(notes[value] * 2, .65, 0, .055);
     voice.tone(notes[value] * 3, .25, 0, .018);
   } else if (kind === 'pop') {
-    voice.tone(460, .12, 0, .2, 'sine', 90); voice.noise(.09, 0, .13, 1600);
+    // A sharp latex snap, a short air burst and a low pressure impulse.
+    voice.noise(.035, 0, .34, 6200, .25, .0003);
+    voice.noise(.115, .001, .27, 2300, .25, .0005);
+    voice.tone(95, .075, 0, .15, 'sine', 45);
   } else if (kind === 'drum') {
     if (value === 2) voice.noise(.55, 0, .28, 5500, .3);
     else { voice.tone(value ? 250 : 140, .4, 0, .32, 'sine', value ? 110 : 48); voice.noise(.12, 0, .18, value ? 1800 : 700); }

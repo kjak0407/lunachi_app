@@ -18,11 +18,11 @@ const games = [
   { id: 'fruit', name: 'くだもの', fullName: 'くだものどうぞ', art: 10, color: '#f3dce0' },
   { id: 'water', name: 'おみず', fullName: 'おみずちゃぷちゃぷ', art: 13, color: '#daebed' },
 ];
-let preferences = { enabled: true, volume: 60, musicEnabled: true, musicVolume: 35 };
+let preferences = { enabled: true, volume: 60, musicEnabled: true, musicVolume: 35, shuffleSeconds: 60 };
 try {
   const saved = JSON.parse(localStorage.getItem('lunachi-sound') || 'null');
   if (saved && typeof saved.enabled === 'boolean' && Number.isFinite(saved.volume)) {
-    preferences = { enabled: saved.enabled, volume: Math.max(0, Math.min(100, saved.volume)), musicEnabled: saved.musicEnabled !== false, musicVolume: Number.isFinite(saved.musicVolume) ? Math.max(0, Math.min(100, saved.musicVolume)) : 35 };
+    preferences = { enabled: saved.enabled, volume: Math.max(0, Math.min(100, saved.volume)), musicEnabled: saved.musicEnabled !== false, musicVolume: Number.isFinite(saved.musicVolume) ? Math.max(0, Math.min(100, saved.musicVolume)) : 35, shuffleSeconds: Number.isFinite(saved.shuffleSeconds) ? Math.round(Math.max(10, Math.min(300, saved.shuffleSeconds)) / 10) * 10 : 60 };
   }
 } catch { /* Storage can be unavailable in private browsing. */ }
 let audio, master, effectsGain, activeVoice, page = 0, playRequest = 0;
@@ -34,6 +34,8 @@ function syncSettings() {
   $('sound-enabled').checked = preferences.enabled;
   $('volume').value = preferences.volume;
   $('volume-value').textContent = `${preferences.volume}%`;
+  $('shuffle-seconds').value = preferences.shuffleSeconds;
+  $('shuffle-seconds-value').textContent = `${preferences.shuffleSeconds}秒`;
   const muted = !preferences.enabled;
   $('mute-button').innerHTML = soundSvg(muted);
   $('mute-button').setAttribute('aria-label', muted ? '音をオンにする' : '音をオフにする');
@@ -146,16 +148,8 @@ for (let p = 0; p < pageCount; p++) {
     button.dataset.game = game.id;
     button.setAttribute('aria-label', `${game.fullName}で遊ぶ`);
     const artPosition = `${game.art % 4 / 3 * 100}% ${Math.floor(game.art / 4) / 3 * 100}%`;
-    button.innerHTML = `<span class="tile-art">${game.id === 'animals' ? '<span class="animal-portrait" style="--position:0% 0%;width:95%" aria-hidden="true"></span>' : `<span class="toy-art" style="--toy-position:${artPosition}" aria-hidden="true"></span>`}<span class="play-badge" aria-hidden="true">▶</span></span><span class="tile-name">${game.name}</span>`;
-    button.addEventListener('click', () => {
-      if (game.id !== 'animals') { openToyGame(game.id); return; }
-      initAudio();
-      $('home').hidden = true;
-      $('animals').hidden = false;
-      document.body.classList.add('in-meadow');
-      window.scrollTo(0, 0);
-      $('back-home').focus({ preventScroll: true });
-    });
+    button.innerHTML = `<span class="tile-art">${game.id === 'animals' ? '<span class="animal-portrait" style="--position:0% 0%;width:95%" aria-hidden="true"></span>' : `<span class="toy-art" style="--toy-position:${artPosition}" aria-hidden="true"></span>`}</span><span class="tile-name">${game.name}</span>`;
+    button.addEventListener('click', () => openPlayroomGame(game.id));
     grid.append(button);
   });
   track.append(grid);
@@ -167,6 +161,15 @@ for (let p = 0; p < pageCount; p++) {
   $('page-dots').append(dot);
 }
 $('home-pages').append(track);
+function openPlayroomGame(id) {
+  if (id !== 'animals') { openToyGame(id); return; }
+  disposeToyGame(); stopSound(); stopToySounds(); currentToy = null;
+  initAudio();
+  $('home').hidden = true; $('toy-game').hidden = true; $('animals').hidden = false;
+  document.body.classList.remove('in-toy'); document.body.classList.add('in-meadow');
+  window.scrollTo(0, 0);
+  $('back-home').focus({ preventScroll: true });
+}
 function setPage(next) {
   page = Math.max(0, Math.min(pageCount - 1, next));
   track.style.transform = `translateX(-${page * 100}%)`;
@@ -246,4 +249,32 @@ settings.addEventListener('click', () => {
 $('sound-enabled').addEventListener('change', (e) => { preferences.enabled = e.target.checked; if (!preferences.enabled) stopSound(); syncSettings(); });
 $('volume').addEventListener('input', (e) => { preferences.volume = Number(e.target.value); if (preferences.volume === 0) stopSound(); syncSettings(); });
 document.addEventListener('visibilitychange', () => { if (document.hidden) stopSound(); });
+$('refresh-button').addEventListener('click', async () => {
+  const button = $('refresh-button'), status = $('refresh-status');
+  button.disabled = true; button.setAttribute('aria-busy', 'true');
+  status.hidden = false; status.textContent = '更新しています…';
+  stopSound();
+  if (typeof stopToySounds === 'function') stopToySounds();
+  if (typeof stopMusic === 'function') stopMusic();
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 10000);
+  try {
+    // Revalidate cached code and styles, including on GitHub Pages.
+    const urls = [...document.querySelectorAll('script[src],link[rel="stylesheet"]')]
+      .map(element => element.src || element.href);
+    urls.push(new URL('index.html', location.href).href);
+    await Promise.all(urls.map(async url => {
+      const response = await fetch(url, {cache:'reload', signal:controller.signal});
+      if (!response.ok) throw new Error('Update unavailable');
+      await response.arrayBuffer();
+    }));
+    const url = new URL(location.href);
+    url.searchParams.set('_refresh', String(Date.now()));
+    location.replace(url.href);
+  } catch {
+    status.textContent = '更新できませんでした。通信を確認して、もう一度押してください。';
+    button.disabled = false; button.removeAttribute('aria-busy');
+    if (typeof syncMusic === 'function') syncMusic();
+  } finally { clearTimeout(timeout); }
+});
 syncSettings();

@@ -28,6 +28,8 @@ test('Separate volumes persist across reload; effects volume does not change the
   const reloaded = setup(first.saved());
   assert.equal(reloaded.preferences().volume, 22);
   assert.equal(reloaded.preferences().musicVolume, 77);
+  vm.runInContext('preferences.shuffleSeconds=120; syncSettings()', first.context);
+  assert.equal(setup(first.saved()).preferences().shuffleSeconds, 120);
   vm.runInContext('preferences.volume=0; syncSettings()', first.context);
   assert.equal(first.levels.master, .75);
   assert.equal(first.levels.effects, 0);
@@ -37,6 +39,7 @@ test('Existing settings remain usable and storage failures are visible', () => {
   const h = setup(JSON.stringify({enabled:true,volume:44}), true);
   assert.equal(h.preferences().volume, 44);
   assert.equal(h.preferences().musicVolume, 35);
+  assert.equal(h.preferences().shuffleSeconds, 60);
   h.context.syncSettings();
   assert.match(h.nodes.get('settings-save-status').textContent, /保存できません/);
   assert.equal(h.levels.effects, .44);

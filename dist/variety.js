@@ -84,12 +84,27 @@ toyBuilders.balloons = (scope) => {
       const a = button.getBoundingClientRect(), b = stage.getBoundingClientRect();
       button.classList.add('popped'); button.disabled = true;
       toySound('pop');
+      const x = a.left + a.width / 2 - b.left, y = a.top + a.height * .35 - b.top;
+      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const ring = document.createElement('span');
+      ring.className = 'balloon-pop-ring'; ring.setAttribute('aria-hidden', 'true');
+      ring.style.cssText = `left:${x}px;top:${y}px`;
+      stage.append(ring); scope.after(() => ring.remove(), 650);
+      for (let k = 0; k < (reduced ? 6 : 22); k++) {
+        const bit = document.createElement('span');
+        bit.className = `balloon-confetti${k % 3 === 0 ? ' confetti-star' : ''}`;
+        bit.setAttribute('aria-hidden', 'true');
+        bit.textContent = k % 3 === 0 ? '✦' : '';
+        const angle = Math.PI * 2 * k / 22, distance = 70 + Math.random() * 100;
+        bit.style.cssText = `left:${x}px;top:${y}px;--confetti-x:${Math.cos(angle) * distance}px;--confetti-y:${Math.sin(angle) * distance}px;--confetti-color:${toyColors[k % toyColors.length]};--confetti-turn:${k % 2 ? 360 : -360}deg`;
+        stage.append(bit); scope.after(() => bit.remove(), 1150);
+      }
       const prizes = [varietyArt(14), varietyArt(15), '⭐', toyArt(10), '🌈'];
-      for (let j = 0; j < 3; j++) {
+      for (let j = 0; j < 5; j++) {
         const prize = document.createElement('span');
         prize.className = 'balloon-prize'; prize.setAttribute('aria-hidden', 'true');
         prize.innerHTML = prizes[(i + j) % prizes.length];
-        prize.style.cssText = `left:${a.left + a.width / 2 - b.left}px;top:${a.top + a.height * .35 - b.top}px;--prize-x:${(j - 1) * 65}px;--prize-y:${-65 + j * 20}px`;
+        prize.style.cssText = `left:${x}px;top:${y}px;--prize-x:${(j - 2) * 52}px;--prize-y:${-95 + Math.abs(j - 2) * 25}px`;
         stage.append(prize); scope.after(() => prize.remove(), 1300);
       }
       scope.after(() => {
