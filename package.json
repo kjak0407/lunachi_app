@@ -1,1 +1,2 @@
-{"name":"lunachi-playroom","version":"0.4.0","private":true,"type":"module","scripts":{"start":"node server.mjs","check":"node --check dist/app.js && node --check dist/games.js && node --check dist/variety.js && node --check dist/music.js && node --check server.mjs","test":"node --test --test-isolation=none tests/music.test.mjs"}}
+{"name":"lunachi-playroom","version":"0.4.0","private":true,"type":"module","scripts":{"start":"node server.mjs","check":"node --check dist/instruments.js && node --check dist/vehicles.js && node --check dist/app.js && node --check dist/games.js && node --check dist/variety.js && node --check dist/music.js && node --check server.mjs","test":"node --test --test-isolation=none tests/music.test.mjs"}}
+

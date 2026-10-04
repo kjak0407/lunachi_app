@@ -35,6 +35,8 @@ Privateのコード保存を希望する場合はチェックを付けたまま�
 
 ### 3. GitHub Pagesを有効にする
 
+**「Upgrade or make this repository public to enable Pages」と表示され、Sourceがない場合**：リポジトリがPrivateで、現在のプランではPagesを使えない状態です。有料プランへの変更は必須ではありません。コード・画像・音声・コミット履歴が誰でも見られる状態にしてよければ、**Settings → General → ページ下部のDanger Zone → Change repository visibility → Change visibility → Make public** で、画面の確認に従ってPublicに変更します。その後 **Settings → Pages** を開き直すと、Sourceを設定できます。公開範囲を広げる操作なので、非公開を保ちたい場合は変更せず方法Bを選んでください。
+
 1. ブラウザのリポジトリ画面で **Settings → Pages** を開きます。
 2. **Build and deployment → Source** を **GitHub Actions** にします。
 3. **Actions** タブを開き、左側の **Publish playroom to GitHub Pages** を選びます。

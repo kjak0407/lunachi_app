@@ -32,6 +32,21 @@ body.in-toy .app{width:min(100%,760px);padding:0}
 
 /* Vehicle tracks are touch targets across the entire lane. */
 .vehicles-stage{display:flex;flex-direction:column;justify-content:space-evenly;gap:24px;padding:28px 0 16px}
+.vehicle-lanes{display:flex;flex:1;flex-direction:column;justify-content:space-evenly;gap:12px;min-height:350px}
+.vehicle-art{display:block;width:100%;height:130px;overflow:visible}
+.toy-stage .road-lane:not(.train-lane):not(.boat-lane){background:linear-gradient(transparent 50%,#ddd5bf 50%,#ddd5bf 87%,transparent 87%)}
+.toy-stage .sky-lane{background:linear-gradient(#dcecfa88,#eff7fd88);border-radius:25px}
+.sky-lane::before{content:'☁';position:absolute;left:60%;top:20px;font-size:55px;color:#fff9;pointer-events:none}
+.vehicle-pager{display:flex;align-items:center;justify-content:center;gap:14px;flex-shrink:0}
+.toy-stage .vehicle-pager button{width:52px;height:48px;background:#fffc;border-radius:18px;font-size:34px;line-height:1;color:#89735f;box-shadow:0 3px 0 #d4c6b4}
+.vehicle-page-label{font-size:12px;text-align:center;color:#89735f;min-width:145px}
+.running.sky-lane .vehicle-actor{animation-name:vehicle-fly}
+.running .vehicle-beacon{animation:vehicle-light .45s ease-in-out infinite alternate}
+.running .vehicle-rotor{transform-origin:89px 20px;animation:vehicle-rotor .15s linear infinite}
+@keyframes vehicle-light{to{fill:#ff4d68;filter:drop-shadow(0 0 6px #ffa49b)}}
+@keyframes vehicle-rotor{50%{transform:scaleX(.12)}}
+@keyframes vehicle-fly{0%{transform:translate(0,12px);opacity:1}65%{transform:translate(var(--travel),-18px) rotate(-8deg);opacity:1}85%{transform:translate(calc(var(--travel) + 100px),-24px);opacity:0}86%{transform:translate(0,12px);opacity:0}100%{transform:translate(0,12px);opacity:1}}
+@media(prefers-reduced-motion:reduce){.running.sky-lane .vehicle-actor{animation:none;transform:translateX(35px)}.running .vehicle-beacon,.running .vehicle-rotor{animation:none}}
 .toy-stage .vehicle-lane{position:relative;min-height:110px;width:100%;border-radius:25px;overflow:hidden;text-align:left}
 .toy-stage .car-lane{background:linear-gradient(transparent 50%,#ddd5bf 50%,#ddd5bf 87%,transparent 87%)}
 .car-lane::after{content:'';position:absolute;left:0;right:0;top:77%;height:3px;background:repeating-linear-gradient(90deg,#fff9 0 28px,transparent 28px 48px);pointer-events:none}
@@ -40,11 +55,29 @@ body.in-toy .app{width:min(100%,760px);padding:0}
 .vehicle-actor{display:block;position:relative;z-index:2;width:130px;margin-left:8px;pointer-events:none}
 .vehicle-name{position:absolute;right:16px;bottom:5px;font-size:13px;background:#fff9;border-radius:20px;padding:3px 11px}
 .vehicle-call{position:absolute;top:7px;right:16px;background:#fff9;border-radius:20px;padding:4px 10px;font-size:16px;opacity:0}
-.running .vehicle-actor{animation:vehicle-drive 1.7s ease-in-out both}
-.running .vehicle-call{animation:say 1.6s ease both}
+.running .vehicle-actor{animation:vehicle-drive var(--drive-duration, 2.8s) ease-in-out both}
+.running .vehicle-call{animation:say var(--drive-duration, 2.8s) ease both}
 @keyframes vehicle-drive{0%{transform:translateX(0);opacity:1}70%{transform:translateX(var(--travel));opacity:1}85%{transform:translateX(calc(var(--travel) + 100px));opacity:0}86%{transform:translateX(0);opacity:0}100%{transform:translateX(0);opacity:1}}
 
-/* Three different drum sounds */
+/* Nine instruments in a small pastel orchestra. */
+.drums-screen{background:radial-gradient(ellipse at 50% 15%,#fff8e9 0,#fff1de 65%)}
+.drums-stage{display:flex;flex-direction:column;min-height:410px;overflow:visible}
+.instrument-announcement{height:38px;flex-shrink:0;text-align:center;padding:9px 0 0;font-size:15px;font-weight:700;color:#947354;opacity:0}
+.instrument-saying{animation:say 1.4s ease both}
+.instrument-orchestra{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 5px;align-content:space-evenly;flex:1;padding:9px 0 20px}
+.toy-stage .instrument{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:116px;position:relative;border-radius:22px}
+.instrument-picture{width:clamp(78px,24vw,125px);height:clamp(78px,24vw,125px);border-radius:50%;background:radial-gradient(circle,var(--instrument-color) 0%,transparent 70%);position:relative;pointer-events:none}
+.instrument-art{display:block;width:100%;height:100%;filter:drop-shadow(0 3px 1px #a68b6822);overflow:visible}
+.instrument-label{font-size:clamp(10px,2.9vw,14px);padding:4px 6px;white-space:nowrap;color:#806b5d;background:#fffc;border-radius:15px;pointer-events:none}
+.instrument-playing .instrument-picture{animation:instrument-pop .65s ease both}
+.instrument-maracas.instrument-playing .instrument-picture,.instrument-bells.instrument-playing .instrument-picture,.instrument-tambourine.instrument-playing .instrument-picture{animation:instrument-shake .65s ease both}
+.instrument-cymbal.instrument-playing .instrument-picture,.instrument-triangle.instrument-playing .instrument-picture{animation:instrument-ring .9s ease both}
+@keyframes instrument-pop{0%,100%{transform:scale(1)}25%{transform:scale(1.13,.88)}55%{transform:translateY(-12px) scale(.95,1.06)}}
+@keyframes instrument-shake{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-15deg) translateX(-4px)}40%,80%{transform:rotate(15deg) translateX(4px)}}
+@keyframes instrument-ring{0%,100%{transform:rotate(0)}15%,45%{transform:rotate(-8deg) scale(1.08)}30%,60%{transform:rotate(8deg) scale(1.08)}}
+@media(max-height:650px) and (orientation:portrait){.drums-stage{min-height:390px}.instrument-orchestra{gap:6px 4px;padding-bottom:4px}.toy-stage .instrument{min-height:104px}.instrument-picture{width:80px;height:80px}}
+@media(prefers-reduced-motion:reduce){.instrument-playing .instrument-picture{animation:none;filter:brightness(1.1)}.instrument-saying{animation:none;opacity:1}}
+/* Legacy drum styles */
 .drum{position:absolute;display:flex;align-items:center;flex-direction:column;width:clamp(100px,35vw,170px)}
 .drum-0{width:clamp(170px,59vw,260px);left:50%;top:48%;margin-left:calc(clamp(170px,59vw,260px) / -2)}
 .drum-1{left:3%;top:6%;filter:hue-rotate(-30deg)}

@@ -12,7 +12,7 @@ const games = [
   { id: 'piano', name: 'ピアノ', fullName: 'ぽんぽんピアノ', art: 0, color: '#e5dff1' },
   { id: 'balloons', name: 'ふうせん', fullName: 'ぷかぷかふうせん', art: 1, color: '#f6dde2' },
   { id: 'vehicles', name: 'のりもの', fullName: 'のりものブーブー', art: 2, color: '#dbe9eb' },
-  { id: 'drums', name: 'たいこ', fullName: 'ぽこぽこたいこ', art: 5, color: '#f6e3c5' },
+  { id: 'drums', name: 'がっき', fullName: 'わくわく がっき', art: 5, color: '#f6e3c5' },
   { id: 'drawing', name: 'おえかき', fullName: 'きらきらおえかき', art: 6, color: '#deead9' },
   { id: 'peekaboo', name: 'いないばあ', fullName: 'いないいないばあ', art: 7, color: '#e8dff0' },
   { id: 'fruit', name: 'くだもの', fullName: 'くだものどうぞ', art: 10, color: '#f3dce0' },
@@ -55,7 +55,7 @@ function initAudio() {
     master.connect(audio.destination);
     syncSettings();
     // Decode the small local WAVs in advance, before the first animal tap.
-    animals.forEach(({ id }) => { loadAnimalBuffer(id).catch(() => {}); });
+    animals.forEach(({ id }) => { loadRecordingBuffer(id).catch(() => {}); });
   }
   if (audio.state === 'suspended') audio.resume().catch(() => {
     currentSoundStatus().textContent = 'もう一度タップしてね。';
@@ -67,7 +67,7 @@ function currentSoundStatus() {
 }
 
 // Real recordings, trimmed and level-matched. WAV is supported by iPhone Safari.
-function loadAnimalBuffer(id) {
+function loadRecordingBuffer(id) {
   if (buffers.has(id)) return buffers.get(id);
   const promise = fetch(`assets/audio/${id}.wav`)
     .then((response) => {
@@ -98,7 +98,7 @@ async function playSound(id) {
   const request = playRequest;
   let buffer;
   try {
-    const result = await Promise.all([loadAnimalBuffer(id), audio.resume()]);
+    const result = await Promise.all([loadRecordingBuffer(id), audio.resume()]);
     buffer = result[0];
   } catch {
     if (request === playRequest) currentSoundStatus().textContent = '音を読み込めませんでした。もう一度タップしてね。';
@@ -107,12 +107,15 @@ async function playSound(id) {
   // A newer tap, home navigation, mute or backgrounding cancels this sound.
   const onAnimalScreen = !$('animals').hidden;
   const onPeekabooScreen = !$('toy-game').hidden && $('toy-game').classList.contains('peekaboo-screen');
-  if (request !== playRequest || !preferences.enabled || preferences.volume === 0 || document.hidden || !(onAnimalScreen || onPeekabooScreen)) return;
+  const vehicleSound = vehicleCatalog.some(vehicle => vehicle.id === id);
+  const onVehicleScreen = !$('toy-game').hidden && $('toy-game').classList.contains('vehicles-screen');
+  const onMatchingScreen = vehicleSound ? onVehicleScreen : (onAnimalScreen || onPeekabooScreen);
+  if (request !== playRequest || !preferences.enabled || preferences.volume === 0 || document.hidden || !onMatchingScreen) return;
   currentSoundStatus().textContent = '';
   const source = audio.createBufferSource();
   const gain = audio.createGain();
   source.buffer = buffer;
-  // Keep the recorded pitch and speed so each animal remains recognizable.
+  // Keep natural pitch and speed so the recorded sound remains recognizable.
   source.connect(gain).connect(master);
   const voice = { source, gain };
   activeVoice = voice;
@@ -120,6 +123,7 @@ async function playSound(id) {
     source.disconnect(); gain.disconnect();
     if (activeVoice === voice) activeVoice = null;
   };
+  if (typeof duckMusic === 'function') duckMusic(buffer.duration + .1);
   source.start();
 }
 

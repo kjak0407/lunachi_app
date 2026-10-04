@@ -1,6 +1,22 @@
 // Original local WAV loops share the existing audio output, but have their own level.
 const musicBuffers = new Map();
 let musicStarted = false, musicVoice = null, musicLoading = null, musicRequest = 0;
+let musicDuckUntil = 0, musicDuckTimer;
+
+function musicLevel() {
+  const screenLevel = musicScreen() === 'piano' ? .4 : 1;
+  return preferences.musicVolume / 100 * .85 * screenLevel * (audio.currentTime < musicDuckUntil ? .32 : 1);
+}
+
+// Let taps stand out even with a much more energetic soundtrack.
+function duckMusic(duration = .6) {
+  if (!musicVoice || !audio) return;
+  musicDuckUntil = Math.max(musicDuckUntil, audio.currentTime + duration);
+  musicVoice.gain.gain.cancelScheduledValues(audio.currentTime);
+  musicVoice.gain.gain.setTargetAtTime(musicLevel(), audio.currentTime, .015);
+  clearTimeout(musicDuckTimer);
+  musicDuckTimer = setTimeout(() => syncMusic(), (musicDuckUntil - audio.currentTime) * 1000 + 40);
+}
 
 function musicScreen() {
   if (!$('animals').hidden) return 'animals';
@@ -20,6 +36,7 @@ function musicState(state, track = musicScreen()) {
 }
 
 function stopMusic() {
+  clearTimeout(musicDuckTimer); musicDuckUntil = 0;
   musicRequest++;
   musicLoading = null;
   const previous = musicVoice;
@@ -53,7 +70,7 @@ function syncMusic() {
     musicState(document.hidden ? 'paused' : 'off', track);
     return;
   }
-  const level = preferences.musicVolume / 100 * .42;
+  const level = musicLevel();
   if (musicVoice?.track === track) {
     musicVoice.gain.gain.setTargetAtTime(level, audio.currentTime, .06);
     musicState('playing', track);
@@ -69,7 +86,7 @@ function syncMusic() {
     source.buffer = buffer; source.loop = true;
     source.connect(gain).connect(master);
     gain.gain.setValueAtTime(0, audio.currentTime);
-    gain.gain.linearRampToValueAtTime(preferences.musicVolume / 100 * .42, audio.currentTime + .35);
+    gain.gain.linearRampToValueAtTime(musicLevel(), audio.currentTime + .35);
     source.onended = () => { source.disconnect(); gain.disconnect(); };
     musicVoice = {source, gain, track}; musicLoading = null;
     source.start(); musicState('playing', track);

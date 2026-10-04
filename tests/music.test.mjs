@@ -20,6 +20,7 @@ function setup() {
   const document={hidden:false,body:{dataset:{}},addEventListener(name,fn){events[name]=fn;}};
   const preferences={enabled:true,volume:60,musicEnabled:true,musicVolume:35};
   const context=vm.createContext({$,audio,master:{},preferences,document,currentToy:null,
+    setTimeout,clearTimeout,
     window:{addEventListener(){}},initAudio(){},syncSettings(){context.syncMusic();},
     MutationObserver:class {constructor(fn){observer=fn;}observe(){}},
     fetch(url){let complete;const promise=new Promise(resolve=>complete=resolve);requests.push({url,complete:()=>complete({ok:true,arrayBuffer:async()=>url})});return promise;},
@@ -54,7 +55,7 @@ test('Rapid navigation and backgrounding cancel in-flight music',async()=>{
 });
 test('Music mute, global mute, zero volume and level changes control active source',async()=>{
   const h=setup();h.start();h.requests[0].complete();await h.settle();
-  h.preferences.musicVolume=80;h.context.syncMusic();assert.equal(h.levels.at(-1),.8*.42);
+  h.preferences.musicVolume=80;h.context.syncMusic();assert.equal(h.levels.at(-1),.8*.85);
   h.node('home-music').listeners.click();assert.equal(h.preferences.musicEnabled,false);assert.equal(h.sources.at(-1).stopped,true);
   h.node('home-music').listeners.click();await h.settle();assert.equal(h.document.body.dataset.bgmState,'playing');
   for(const field of ['volume','musicVolume']){
@@ -62,4 +63,10 @@ test('Music mute, global mute, zero volume and level changes control active sour
     h.preferences[field]=35;h.context.syncMusic();await h.settle();assert.equal(h.document.body.dataset.bgmState,'playing');
   }
   h.preferences.enabled=false;h.context.syncMusic();assert.equal(h.sources.at(-1).stopped,true);
+});
+test('Effects briefly lower energetic music, and music returns to its selected level',async()=>{
+  const h=setup();h.start();h.requests[0].complete();await h.settle();
+  h.context.duckMusic(.6);assert.equal(h.levels.at(-1),.35*.85*.32);
+  h.context.audio.currentTime=2;h.context.syncMusic();assert.equal(h.levels.at(-1),.35*.85);
+  h.preferences.enabled=false;h.context.syncMusic();
 });
