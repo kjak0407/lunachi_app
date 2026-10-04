@@ -55,10 +55,11 @@ test('Rapid navigation and backgrounding cancel in-flight music',async()=>{
 });
 test('Music mute, global mute, zero volume and level changes control active source',async()=>{
   const h=setup();h.start();h.requests[0].complete();await h.settle();
-  h.preferences.musicVolume=80;h.context.syncMusic();assert.equal(h.levels.at(-1),.8*.85);
+  h.preferences.musicVolume=80;h.context.syncMusic();assert.equal(h.levels.at(-1),.8*.85*.6);
   h.node('home-music').listeners.click();assert.equal(h.preferences.musicEnabled,false);assert.equal(h.sources.at(-1).stopped,true);
   h.node('home-music').listeners.click();await h.settle();assert.equal(h.document.body.dataset.bgmState,'playing');
-  for(const field of ['volume','musicVolume']){
+  h.preferences.volume=0;h.context.syncMusic();assert.equal(h.document.body.dataset.bgmState,'playing');
+  for(const field of ['musicVolume']){
     h.preferences[field]=0;h.context.syncMusic();assert.equal(h.document.body.dataset.bgmState,'off');
     h.preferences[field]=35;h.context.syncMusic();await h.settle();assert.equal(h.document.body.dataset.bgmState,'playing');
   }
@@ -66,7 +67,8 @@ test('Music mute, global mute, zero volume and level changes control active sour
 });
 test('Effects briefly lower energetic music, and music returns to its selected level',async()=>{
   const h=setup();h.start();h.requests[0].complete();await h.settle();
-  h.context.duckMusic(.6);assert.equal(h.levels.at(-1),.35*.85*.32);
-  h.context.audio.currentTime=2;h.context.syncMusic();assert.equal(h.levels.at(-1),.35*.85);
+  h.context.duckMusic(.6);assert.equal(h.levels.at(-1),.35*.85*.6*.32);
+  h.context.audio.currentTime=2;h.context.syncMusic();assert.equal(h.levels.at(-1),.35*.85*.6);
   h.preferences.enabled=false;h.context.syncMusic();
 });
+

@@ -5,7 +5,7 @@ let musicDuckUntil = 0, musicDuckTimer;
 
 function musicLevel() {
   const screenLevel = musicScreen() === 'piano' ? .4 : 1;
-  return preferences.musicVolume / 100 * .85 * screenLevel * (audio.currentTime < musicDuckUntil ? .32 : 1);
+  return preferences.musicVolume / 100 * .85 * .6 * screenLevel * (audio.currentTime < musicDuckUntil ? .32 : 1);
 }
 
 // Let taps stand out even with a much more energetic soundtrack.
@@ -64,7 +64,7 @@ function syncMusic() {
   $('music-volume').value = preferences.musicVolume;
   $('music-volume-value').textContent = `${preferences.musicVolume}%`;
   const track = musicScreen();
-  const shouldPlay = musicStarted && audio && preferences.enabled && preferences.volume > 0 && preferences.musicEnabled && preferences.musicVolume > 0 && !document.hidden;
+  const shouldPlay = musicStarted && audio && preferences.enabled && preferences.musicEnabled && preferences.musicVolume > 0 && !document.hidden;
   if (!shouldPlay) {
     if (musicVoice || musicLoading) stopMusic();
     musicState(document.hidden ? 'paused' : 'off', track);
@@ -81,7 +81,7 @@ function syncMusic() {
   const token = musicRequest;
   musicLoading = track; musicState('loading', track);
   Promise.all([musicBuffer(track), audio.resume()]).then(([buffer]) => {
-    if (token !== musicRequest || document.hidden || musicScreen() !== track || !preferences.enabled || preferences.volume === 0 || !preferences.musicEnabled || preferences.musicVolume === 0) return;
+    if (token !== musicRequest || document.hidden || musicScreen() !== track || !preferences.enabled || !preferences.musicEnabled || preferences.musicVolume === 0) return;
     const source = audio.createBufferSource(), gain = audio.createGain();
     source.buffer = buffer; source.loop = true;
     source.connect(gain).connect(master);
@@ -106,11 +106,10 @@ function unlockMusic(event) {
 document.addEventListener('pointerdown', unlockMusic, {capture:true});
 document.addEventListener('keydown', unlockMusic, {capture:true});
 $('home-music').addEventListener('click', () => {
-  if (musicStarted && preferences.enabled && preferences.volume > 0 && preferences.musicEnabled && preferences.musicVolume > 0 && (musicVoice || musicLoading)) {
+  if (musicStarted && preferences.enabled && preferences.musicEnabled && preferences.musicVolume > 0 && (musicVoice || musicLoading)) {
     preferences.musicEnabled = false;
   } else {
     musicStarted = true; preferences.musicEnabled = true; preferences.enabled = true;
-    if (preferences.volume === 0) preferences.volume = 60;
     if (preferences.musicVolume === 0) preferences.musicVolume = 35;
     initAudio();
   }

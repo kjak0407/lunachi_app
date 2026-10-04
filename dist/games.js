@@ -22,7 +22,7 @@ function toyVoice(duration = .6) {
   if (!audio) { $('toy-status').textContent = 'このブラウザでは音が使えません。'; return null; }
   while (toyVoices.size >= 8) toyVoices.values().next().value.stop();
   const output = audio.createGain();
-  output.connect(master);
+  output.connect(effectsGain);
   const sources = [];
   let ended = false, remaining = 0;
   const now = audio.currentTime;
@@ -191,9 +191,8 @@ $('toy-home').addEventListener('click', () => {
   document.querySelector(`[data-game="${previous}"]`).focus({ preventScroll: true });
 });
 $('toy-mute').addEventListener('click', () => {
-  const muted = !preferences.enabled || preferences.volume === 0;
+  const muted = !preferences.enabled;
   preferences.enabled = muted;
-  if (muted && preferences.volume === 0) preferences.volume = 60;
   if (!preferences.enabled) { stopToySounds(); stopSound(); }
   syncSettings();
 });

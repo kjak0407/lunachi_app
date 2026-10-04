@@ -25,7 +25,7 @@ try {
     preferences = { enabled: saved.enabled, volume: Math.max(0, Math.min(100, saved.volume)), musicEnabled: saved.musicEnabled !== false, musicVolume: Number.isFinite(saved.musicVolume) ? Math.max(0, Math.min(100, saved.musicVolume)) : 35 };
   }
 } catch { /* Storage can be unavailable in private browsing. */ }
-let audio, master, activeVoice, page = 0, playRequest = 0;
+let audio, master, effectsGain, activeVoice, page = 0, playRequest = 0;
 const buffers = new Map();
 const pageCount = Math.ceil(games.length / 9);
 const soundSvg = (muted) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4 6 8H3v8h3l5 4Z"/>${muted ? '<path d="m16 9 5 6m0-6-5 6"/>' : '<path d="M15 8a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/>'}</svg>`;
@@ -34,16 +34,22 @@ function syncSettings() {
   $('sound-enabled').checked = preferences.enabled;
   $('volume').value = preferences.volume;
   $('volume-value').textContent = `${preferences.volume}%`;
-  const muted = !preferences.enabled || preferences.volume === 0;
+  const muted = !preferences.enabled;
   $('mute-button').innerHTML = soundSvg(muted);
   $('mute-button').setAttribute('aria-label', muted ? '音をオンにする' : '音をオフにする');
   $('mute-button').setAttribute('aria-pressed', String(muted));
   $('toy-mute').innerHTML = soundSvg(muted);
   $('toy-mute').setAttribute('aria-label', muted ? '音をオンにする' : '音をオフにする');
   $('toy-mute').setAttribute('aria-pressed', String(muted));
-  if (master) master.gain.setTargetAtTime(preferences.enabled ? preferences.volume / 100 * .75 : 0, audio.currentTime, .025);
+  if (master) master.gain.setTargetAtTime(preferences.enabled ? .75 : 0, audio.currentTime, .025);
+  if (effectsGain) effectsGain.gain.setTargetAtTime(preferences.volume / 100, audio.currentTime, .025);
   if (typeof syncMusic === 'function') syncMusic();
-  try { localStorage.setItem('lunachi-sound', JSON.stringify(preferences)); } catch { /* Preferences still work without storage. */ }
+  try {
+    localStorage.setItem('lunachi-sound', JSON.stringify(preferences));
+    $('settings-save-status').textContent = 'この端末に自動保存しました。';
+  } catch {
+    $('settings-save-status').textContent = 'このブラウザでは保存できません。開いている間は設定を使えます。';
+  }
 }
 
 function initAudio() {
@@ -53,6 +59,8 @@ function initAudio() {
     audio = new AudioContext();
     master = audio.createGain();
     master.connect(audio.destination);
+    effectsGain = audio.createGain();
+    effectsGain.connect(master);
     syncSettings();
     // Decode the small local WAVs in advance, before the first animal tap.
     animals.forEach(({ id }) => { loadRecordingBuffer(id).catch(() => {}); });
@@ -116,7 +124,7 @@ async function playSound(id) {
   const gain = audio.createGain();
   source.buffer = buffer;
   // Keep natural pitch and speed so the recorded sound remains recognizable.
-  source.connect(gain).connect(master);
+  source.connect(gain).connect(effectsGain);
   const voice = { source, gain };
   activeVoice = voice;
   source.onended = () => {
@@ -224,9 +232,8 @@ $('back-home').addEventListener('click', () => {
   document.querySelector('.app-tile:not(:disabled)').focus({ preventScroll: true });
 });
   $('mute-button').addEventListener('click', () => {
-  const muted = !preferences.enabled || preferences.volume === 0;
+  const muted = !preferences.enabled;
   preferences.enabled = muted;
-  if (muted && preferences.volume === 0) preferences.volume = 60;
   if (!preferences.enabled) stopSound();
   syncSettings();
 });
@@ -247,6 +254,6 @@ settings.addEventListener('pointermove', (e) => {
 settings.addEventListener('contextmenu', (e) => e.preventDefault());
 settings.addEventListener('click', (e) => { if (e.detail === 0) { stopSound(); $('settings-dialog').showModal(); } });
 $('sound-enabled').addEventListener('change', (e) => { preferences.enabled = e.target.checked; if (!preferences.enabled) stopSound(); syncSettings(); });
-$('volume').addEventListener('input', (e) => { preferences.volume = Number(e.target.value); syncSettings(); });
+$('volume').addEventListener('input', (e) => { preferences.volume = Number(e.target.value); if (preferences.volume === 0) stopSound(); syncSettings(); });
 document.addEventListener('visibilitychange', () => { if (document.hidden) stopSound(); });
 syncSettings();
