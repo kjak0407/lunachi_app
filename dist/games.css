@@ -1,0 +1,106 @@
+/* Shared play surface */
+.toy-art{display:block;width:100%;aspect-ratio:1;background-image:url('assets/playthings.png');background-size:400% 400%;background-position:var(--toy-position);background-repeat:no-repeat;pointer-events:none}
+.tile-art>.toy-art{width:88%}
+body.in-toy{background:#fbf7ef}
+body.in-toy .app{width:min(100%,760px);padding:0}
+.play-screen{display:flex;flex-direction:column;min-height:100svh;padding:calc(20px + env(safe-area-inset-top)) 0 calc(10px + env(safe-area-inset-bottom));background:var(--play-bg)}
+.play-screen .game-header{padding:0 20px;margin:0}
+.play-screen .game-hint{margin:18px 12px 6px;text-align:center}
+.play-screen .game-footer{margin:13px 15px 0;line-height:1.7}
+.play-screen .sound-status{margin:3px 12px 0}
+.toy-stage{position:relative;flex:1;min-height:360px;margin:0 16px;isolation:isolate;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.toy-stage button{border:0;background:none;padding:0;-webkit-touch-callout:none;touch-action:none}
+.toy-stage button:focus-visible{outline:3px solid #927357;outline-offset:4px;border-radius:20px}
+.toy-effect{position:absolute;z-index:20;font-size:30px;pointer-events:none;animation:toy-spark .9s ease-out both}
+.toy-bounce{animation:toy-bounce .6s ease}
+@keyframes toy-spark{0%{opacity:0;transform:translate(-50%,-50%) scale(.5)}20%{opacity:1}100%{opacity:0;transform:translate(calc(-50% + var(--effect-x)),calc(-50% + var(--effect-y))) rotate(15deg) scale(1.2)}}
+@keyframes toy-bounce{0%,100%{transform:scale(1)}20%{transform:scale(1.12,.82)}48%{transform:translateY(-22px) scale(.95,1.09)}75%{transform:scale(1.07,.91)}}
+
+/* A piano fills the bottom of the screen, with room for the notes to fly. */
+.piano-stage{display:flex;flex-direction:column;justify-content:flex-end;padding-bottom:30px}
+.piano-notes{flex:1;display:flex;align-items:center;justify-content:center;font-size:52px;letter-spacing:.1em;color:#bc9ac955}
+.piano-board{display:flex;gap:5px;background:#e2cda8;border:7px solid #f6e6cb;border-radius:24px;padding:14px 8px 8px;box-shadow:0 7px 0 #cdb58e;height:clamp(230px,42svh,350px)}
+.toy-stage .piano-key{background:linear-gradient(#fff9,var(--key-color));border:2px solid #fff9;box-shadow:0 6px 0 color-mix(in srgb,var(--key-color) 65%,#ad9886);border-radius:13px;flex:1;min-width:0;display:flex;align-items:flex-end;justify-content:center;padding:0 0 24px;color:#66574f;font-size:16px;font-weight:700}
+.toy-stage .piano-key.key-pressed{transform:translateY(5px);box-shadow:0 1px 0 #ad9886;filter:brightness(1.07)}
+
+/* Floating balloons, no timer or score */
+.balloons-screen{background:linear-gradient(#e9f4fb,#f8f3ef)}
+.balloon{position:absolute;width:clamp(95px,31vw,145px);transform:translate(-50%,-30%)}
+.balloon .toy-art{filter:hue-rotate(var(--hue));animation:balloon-float 3.7s ease-in-out infinite;animation-delay:var(--float-delay);transition:opacity .16s}
+.balloon.popped .toy-art{animation:none;opacity:0}
+@keyframes balloon-float{0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-18px) rotate(4deg)}}
+
+/* Vehicle tracks are touch targets across the entire lane. */
+.vehicles-stage{display:flex;flex-direction:column;justify-content:space-evenly;gap:24px;padding:28px 0 16px}
+.toy-stage .vehicle-lane{position:relative;min-height:110px;width:100%;border-radius:25px;overflow:hidden;text-align:left}
+.toy-stage .car-lane{background:linear-gradient(transparent 50%,#ddd5bf 50%,#ddd5bf 87%,transparent 87%)}
+.car-lane::after{content:'';position:absolute;left:0;right:0;top:77%;height:3px;background:repeating-linear-gradient(90deg,#fff9 0 28px,transparent 28px 48px);pointer-events:none}
+.toy-stage .train-lane{background:linear-gradient(transparent 67%,#b8aaa0 67% 72%,transparent 72% 81%,#b8aaa0 81% 86%,transparent 86%)}
+.toy-stage .boat-lane{background:linear-gradient(transparent 48%,#a9d3de88 48% 92%,transparent 92%)}
+.vehicle-actor{display:block;position:relative;z-index:2;width:130px;margin-left:8px;pointer-events:none}
+.vehicle-name{position:absolute;right:16px;bottom:5px;font-size:13px;background:#fff9;border-radius:20px;padding:3px 11px}
+.vehicle-call{position:absolute;top:7px;right:16px;background:#fff9;border-radius:20px;padding:4px 10px;font-size:16px;opacity:0}
+.running .vehicle-actor{animation:vehicle-drive 1.7s ease-in-out both}
+.running .vehicle-call{animation:say 1.6s ease both}
+@keyframes vehicle-drive{0%{transform:translateX(0);opacity:1}70%{transform:translateX(var(--travel));opacity:1}85%{transform:translateX(calc(var(--travel) + 100px));opacity:0}86%{transform:translateX(0);opacity:0}100%{transform:translateX(0);opacity:1}}
+
+/* Three different drum sounds */
+.drum{position:absolute;display:flex;align-items:center;flex-direction:column;width:clamp(100px,35vw,170px)}
+.drum-0{width:clamp(170px,59vw,260px);left:50%;top:48%;margin-left:calc(clamp(170px,59vw,260px) / -2)}
+.drum-1{left:3%;top:6%;filter:hue-rotate(-30deg)}
+.drum-2{right:3%;top:8%;filter:hue-rotate(30deg)}
+.drum-label{position:relative;font-size:20px;font-weight:700;border-radius:30px;background:#fff8;padding:5px 15px;margin-top:-10px}
+.drum-0 .drum-label{font-size:25px}
+
+/* Drawing canvas stretches below its palette; points survive resizing. */
+.drawing-stage{display:flex;flex-direction:column;gap:14px;min-height:340px}
+.drawing-toolbar{display:flex;align-items:center;justify-content:center;gap:7px;padding:10px 0}
+.toy-stage .color-choice{background:var(--paint);border:3px solid #fff;width:38px;height:38px;border-radius:50%;box-shadow:0 2px 0 #b1a49444}
+.toy-stage .color-choice[aria-pressed=true]{outline:2px solid #917c66;outline-offset:2px}
+.toy-stage .clear-drawing{background:#fff;border:1px solid #e7ddd0;border-radius:16px;min-width:44px;height:40px;font-size:14px;margin-left:3px}
+.drawing-canvas{display:block;width:100%;height:0;min-height:270px;flex:1 1 0;background:#fffcf7;border:3px solid #fff;border-radius:25px;box-shadow:0 4px 0 #e8e1d3;touch-action:none}
+
+/* Peekaboo in the same soft meadow as the animal game. */
+.peekaboo-screen{background:#e2edce url('assets/meadow.png') center/cover no-repeat}
+.peek-friend{position:absolute;width:clamp(120px,43vw,190px);height:clamp(140px,48vw,210px)}
+.peek-0{left:50%;top:8%;transform:translateX(-50%)}
+.peek-1{left:0;top:53%}
+.peek-2{right:0;top:57%}
+.peek-animal{position:absolute;width:100%;max-width:none;bottom:15%;left:0;opacity:0;transform:translateY(28px) scale(.7);transition:transform .4s ease,opacity .3s}
+.peek-cover{position:absolute;left:0;bottom:0;width:100%;z-index:2;transition:transform .4s ease,opacity .3s;pointer-events:none}
+.revealed .peek-animal{opacity:1;transform:translateY(-15px) scale(1)}
+.revealed .peek-cover{transform:translateY(35px) scale(.85);opacity:.3}
+.peek-call{position:absolute;top:-7px;left:50%;transform:translateX(-50%);border-radius:20px;background:#fff9;padding:5px 14px;font-size:22px;font-weight:700;opacity:0;pointer-events:none;z-index:4;white-space:nowrap}
+.revealed .peek-call{opacity:1}
+
+/* Fruit characters squash and spring back. */
+.fruit{position:absolute;width:clamp(145px,47vw,220px)}
+.fruit-0{left:0;top:6%}
+.fruit-1{right:0;top:34%}
+.fruit-2{left:3%;top:66%}
+.fruit-label{display:block;font-size:15px;letter-spacing:.08em;text-align:center;margin-top:-9px}
+.fruit-call{position:absolute;right:0;top:0;background:#fff9;border-radius:20px;padding:5px 10px;opacity:0;font-size:18px;font-weight:700;pointer-events:none}
+.fruit-playing .toy-art{animation:fruit-squish .8s ease}
+.fruit-playing .fruit-call{animation:say 1s ease}
+@keyframes fruit-squish{0%,100%{transform:scale(1)}17%{transform:scale(1.2,.72) rotate(-8deg)}40%{transform:translateY(-40px) scale(.88,1.14) rotate(10deg)}64%{transform:scale(1.16,.83) rotate(-6deg)}83%{transform:translateY(-12px) rotate(4deg)}}
+
+/* Touch anywhere on the pond to create ripples. */
+.water-stage{border-radius:40% 36% 35% 40% / 12% 11% 13% 12%;margin:15px 10px 5px;background:radial-gradient(ellipse at 35% 20%,#e4f7f6,#b0dce5 65%,#9dc9da);overflow:hidden;min-height:350px;box-shadow:inset 0 0 0 5px #ffffff5e}
+.water-surface{position:absolute;inset:0;touch-action:none}
+.water-surface:focus-visible{outline:3px solid #709dab;outline-offset:-8px;border-radius:inherit}
+.water-duck{position:absolute;width:clamp(130px,43vw,200px);left:8%;top:22%}
+.water-duck>.toy-art{animation:duck-float 4s ease-in-out infinite}
+.water-fish{position:absolute;width:clamp(115px,38vw,180px);right:6%;top:62%}
+.water-fish>.toy-art{animation:fish-float 4s ease-in-out infinite}
+.fish-swimming>.toy-art{animation:fish-swim .9s ease both}
+.water-ripple{position:absolute;width:30px;height:18px;border:3px solid #fff9;border-radius:50%;transform:translate(-50%,-50%);animation:ripple 1.2s ease-out both;pointer-events:none;z-index:5}
+.water-ripple::after{content:'';position:absolute;inset:-12px;border:2px solid #fff6;border-radius:50%}
+@keyframes ripple{0%{transform:translate(-50%,-50%) scale(.3);opacity:1}100%{transform:translate(-50%,-50%) scale(5);opacity:0}}
+@keyframes duck-float{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-9px) rotate(3deg)}}
+@keyframes fish-float{0%,100%{transform:translateX(0)}50%{transform:translateX(-20px) rotate(-4deg)}}
+@keyframes fish-swim{0%,100%{transform:translateX(0)}35%{transform:translateX(30px) rotate(-10deg)}65%{transform:translateX(-35px) rotate(8deg)}}
+
+@media(max-width:360px){.play-screen .game-header{padding:0 14px;gap:7px}.toy-stage{margin-left:10px;margin-right:10px}.piano-board{gap:3px;padding:10px 5px 5px;border-width:5px}.toy-stage .piano-key{font-size:14px;border-radius:10px;padding-bottom:18px}.drawing-toolbar{gap:5px}.toy-stage .color-choice{width:33px;height:33px}.toy-stage .clear-drawing{min-width:40px}.drum-label{font-size:17px}.play-screen .game-header h1{font-size:14px}}
+@media(max-height:650px) and (orientation:portrait){.play-screen{padding-top:calc(12px + env(safe-area-inset-top));padding-bottom:calc(6px + env(safe-area-inset-bottom))}.play-screen .game-hint{margin-top:12px}.toy-stage{min-height:340px}.play-screen .game-footer{margin-top:9px}.piano-stage{padding-bottom:14px}.piano-board{height:230px}.balloon{width:100px}.vehicles-stage{gap:8px;padding:10px 0}.vehicle-lane{min-height:102px!important}.vehicle-actor{width:105px}.drum-0{width:170px;margin-left:-85px;top:44%}.drum-1,.drum-2{width:110px}.peek-friend{width:130px;height:150px}.peek-0{top:4%}.peek-1{top:49%}.peek-2{top:51%}.fruit{width:140px}.fruit-0{top:2%}.fruit-1{top:29%}.fruit-2{top:59%}.water-stage{min-height:330px}}
+@media(min-width:700px){.piano-board{margin:0 25px}.vehicles-stage{padding-left:35px;padding-right:35px}.drum-1{left:15%}.drum-2{right:15%}.peek-1{left:9%}.peek-2{right:9%}.fruit-0{left:15%}.fruit-1{right:12%}.fruit-2{left:20%}.drawing-toolbar{gap:14px}.color-choice{width:44px!important;height:44px!important}}
+@media(prefers-reduced-motion:reduce){.balloon .toy-art,.water-duck>.toy-art,.water-fish>.toy-art{animation:none}.running .vehicle-actor{animation:none;transform:translateX(35px)}.toy-effect{animation:none;opacity:.8}.fruit-playing .fruit-call{animation:none;opacity:1}.water-ripple{animation:none;transform:translate(-50%,-50%) scale(3)}}

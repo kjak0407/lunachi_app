@@ -1,0 +1,49 @@
+.variety-art{background-image:url('assets/variety.png')}
+.home-music{display:block;margin:-12px auto 20px;padding:8px 16px;min-height:40px;border:1px solid #eadfd3;border-radius:22px;background:#fff9;color:#8f7764;font-size:12px}
+#music-volume{width:100%;height:40px;accent-color:#b88066;margin:9px 0}
+/* Roaming is on the touch target; the child can stop it with a tap and watch it jump. */
+.animal-friend{animation:meadow-walk 13s ease-in-out infinite;animation-delay:var(--idle-delay)}
+.animal-friend.playing{animation-play-state:paused;--reaction:happy-jump}
+.animal-dog{--path-start:23%;--path-middle:65%;--path-end:35%;--walk-y:10px}
+.animal-cat{--path-start:75%;--path-middle:38%;--path-end:69%;--walk-y:-10px}
+.animal-cow{--path-start:23%;--path-middle:56%;--path-end:30%;--walk-y:-14px}
+.animal-chick{--path-start:71%;--path-middle:38%;--path-end:74%;--walk-y:10px}
+.animal-pig{--path-start:26%;--path-middle:57%;--path-end:22%;--walk-y:-12px}
+.animal-sheep{--path-start:77%;--path-middle:43%;--path-end:73%;--walk-y:-10px}
+@keyframes meadow-walk{0%,100%{left:var(--path-start);transform:translate(-50%,-50%)}40%{left:var(--path-middle);transform:translate(-50%,calc(-50% + var(--walk-y)))}70%{left:var(--path-end);transform:translate(-50%,calc(-50% - var(--walk-y)))}}
+.balloons-stage{overflow:hidden;margin:0;--flight-height:calc(100svh - 60px)}
+.rising-balloon{position:absolute;top:100%;width:clamp(85px,24vw,130px);margin-left:calc(clamp(85px,24vw,130px) / -2);animation:balloon-rise var(--rise-time) linear infinite;animation-delay:var(--rise-delay)}
+.rising-balloon .toy-art{filter:hue-rotate(var(--hue));animation:balloon-float 3s ease-in-out infinite}
+.rising-balloon.popped{animation:none;visibility:hidden}
+@keyframes balloon-rise{0%{transform:translate(0,0)}50%{transform:translate(var(--sway),calc(var(--flight-height) / -2))}100%{transform:translate(0,calc(-1 * var(--flight-height)))}}
+.balloon-prize{position:absolute;width:65px;height:65px;display:grid;place-items:center;font-size:42px;pointer-events:none;z-index:20;animation:prize-pop 1.3s ease-out both}
+@keyframes prize-pop{0%{transform:translate(-50%,-50%) scale(.2);opacity:0}20%{opacity:1}55%{transform:translate(calc(-50% + var(--prize-x)),calc(-50% + var(--prize-y))) scale(1.1);opacity:1}100%{transform:translate(calc(-50% + var(--prize-x)),calc(-50% + var(--prize-y) + 70px)) scale(.8);opacity:0}}
+.hide-object{position:absolute;width:clamp(92px,29vw,150px);height:clamp(102px,32vw,168px);transform:translate(-50%,0)}
+.hide-object .peek-animal{width:100%;bottom:12%}
+.hide-object .peek-call{font-size:17px;top:-10px;padding:3px 10px}
+.hide-object.revealed .peek-animal{transform:translateY(-15px) scale(.92)}
+.hide-object.revealed .peek-cover{transform:translateY(24px) scale(.85)}
+.snack-girl{position:absolute;width:clamp(210px,65vw,285px);left:50%;top:1%;transform:translateX(-50%)}
+.snack-message{position:absolute;top:43%;width:100%;text-align:center;margin:0;font-size:22px;font-weight:700;color:#b5776d}
+.snack-girl.chewing .toy-art{animation:girl-chew .26s ease-in-out infinite alternate}
+@keyframes girl-chew{from{transform:scale(1)}to{transform:scale(1.025,.97) translateY(3px)}}
+.fruit-basket{position:absolute;left:0;right:0;bottom:1%;height:43%;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);gap:2px 10px;align-items:center;border-radius:38px;background:#f1d9b76b;border:4px solid #fff8;padding:6px 12px}
+.feed-fruit{display:flex;flex-direction:column;align-items:center;min-width:0;font-size:13px}
+.feed-fruit .toy-art{width:min(100%,105px)}
+.flying-snack{position:absolute;width:60px;height:60px;z-index:20;pointer-events:none;animation:food-to-mouth .65s ease-in both}
+@keyframes food-to-mouth{0%{transform:translate(0,0) scale(1)}75%{transform:translate(var(--food-x),var(--food-y)) scale(.55);opacity:1}100%{transform:translate(var(--food-x),var(--food-y)) scale(.05);opacity:0}}
+.pond-creature{position:absolute;width:clamp(90px,29vw,135px);transform:translate(-50%,-10%)}
+.creature-swimmer{display:block;animation:creature-drift 4s ease-in-out infinite;animation-delay:var(--float-delay)}
+.creature-swimmer.creature-playing{animation:creature-splash .9s ease}
+@keyframes creature-drift{0%,100%{transform:translateX(-7px) rotate(-4deg)}50%{transform:translateX(9px) translateY(-5px) rotate(4deg)}}
+@keyframes creature-splash{0%,100%{transform:translateY(0)}30%{transform:translateY(-24px) rotate(-12deg)}60%{transform:translateX(18px) rotate(12deg)}}
+.stamp-toolbar{display:flex;justify-content:center;gap:6px;padding:0 2px;flex-wrap:wrap}
+.toy-stage .stamp-tool{width:42px;height:42px;background:#fff9;border-radius:13px;border:2px solid transparent;font-size:22px;display:grid;place-items:center}
+.toy-stage .stamp-tool[aria-pressed=true]{border-color:#a48ca9;background:#f4e7f5}
+.stamp-tool .toy-art,.stamp-tool .animal-portrait{width:100%;height:100%;max-width:none;display:block}
+.drawing-stage{gap:9px}
+.drawing-toolbar{padding:8px 0}
+.drawing-canvas{min-height:220px}
+.drawing-canvas:focus-visible{outline:3px solid #b7a0ba;outline-offset:-4px}
+@media(max-height:650px) and (orientation:portrait){.snack-girl{width:180px;top:0}.snack-message{top:43%;font-size:18px}.fruit-basket{height:44%;gap:0;padding:3px 8px}.feed-fruit .toy-art{width:75px}.hide-object{width:92px;height:100px}.pond-creature{width:85px}.drawing-stage{min-height:340px}.stamp-tool{width:36px!important;height:36px!important}.drawing-canvas{min-height:220px}.balloons-stage{--flight-height:calc(100svh - 40px)}}
+@media(prefers-reduced-motion:reduce){.animal-friend{animation:none}.rising-balloon{animation:none;top:var(--static-top,30%);visibility:visible}.rising-balloon.popped{visibility:hidden}.rising-balloon .toy-art,.creature-swimmer,.snack-girl.chewing .toy-art{animation:none}.flying-snack{animation-duration:.3s!important}.balloon-prize{animation-duration:1s!important}}
