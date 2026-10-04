@@ -148,7 +148,7 @@ for (let p = 0; p < pageCount; p++) {
     button.dataset.game = game.id;
     button.setAttribute('aria-label', `${game.fullName}で遊ぶ`);
     const artPosition = `${game.art % 4 / 3 * 100}% ${Math.floor(game.art / 4) / 3 * 100}%`;
-    button.innerHTML = `<span class="tile-art">${game.id === 'animals' ? '<span class="animal-portrait" style="--position:0% 0%;width:95%" aria-hidden="true"></span>' : `<span class="toy-art" style="--toy-position:${artPosition}" aria-hidden="true"></span>`}</span><span class="tile-name">${game.name}</span>`;
+    button.innerHTML = `<span class="tile-art">${game.id === 'animals' ? '<span class="animal-portrait" style="--position:0% 0%;width:95%" aria-hidden="true"></span>' : `<span class="toy-art" style="--toy-position:${artPosition}" aria-hidden="true"></span>`}</span>`;
     button.addEventListener('click', () => openPlayroomGame(game.id));
     grid.append(button);
   });
