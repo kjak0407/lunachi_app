@@ -12,9 +12,9 @@ function setup() {
   };
   const events={}, requests=[], sources=[], levels=[];
   const audio = {
-    currentTime:1, resume:async()=>{}, decodeAudioData:async bytes=>bytes,
+    currentTime:1, resume:async()=>{}, decodeAudioData:async bytes=>({duration:40,url:bytes}),
     createGain(){return {connect(){},disconnect(){},gain:{cancelScheduledValues(){},setValueAtTime(){},linearRampToValueAtTime(v){levels.push(v);},setTargetAtTime(v){levels.push(v);}}};},
-    createBufferSource(){const source={connect(){return this;},disconnect(){},start(){this.started=true;},stop(){this.stopped=true;}};sources.push(source);return source;},
+    createBufferSource(){const source={connect(){return this;},disconnect(){},start(when,offset){this.started=true;this.offset=offset;},stop(){this.stopped=true;this.onended?.();}};sources.push(source);return source;},
   };
   let observer;
   const document={hidden:false,body:{dataset:{}},addEventListener(name,fn){events[name]=fn;}};
@@ -34,24 +34,23 @@ function setup() {
   };
 }
 
-test('No autoplay; start home music, then switch all twelve games and return home',async()=>{
+test('No autoplay; playlist continues across all twelve games and home',async()=>{
   const h=setup();assert.equal(h.requests.length,0);h.start();
-  assert.equal(h.requests[0].url,'assets/bgm/home.wav');h.requests[0].complete();await h.settle();
+  assert.equal(h.requests[0].url,'assets/bgm/nursery-twinkle.wav');h.requests[0].complete();await h.settle();
   assert.equal(h.document.body.dataset.bgmState,'playing');
   for(const id of ['animals','piano','balloons','vehicles','drums','drawing','peekaboo','fruit','water','explore','blocks','cooking']){
-    const previous=h.sources.at(-1);h.navigate(id);assert.equal(previous.stopped,true);
-    assert.equal(h.requests.at(-1).url,`assets/bgm/${id}.wav`);h.requests.at(-1).complete();await h.settle();
-    assert.equal(h.sources.at(-1).loop,true);assert.equal(h.document.body.dataset.bgmTrack,id);
+    const previous=h.sources.at(-1);h.navigate(id);assert.equal(previous.stopped,undefined);
+    assert.equal(h.sources.at(-1),previous);assert.equal(previous.loop,false);
   }
-  h.navigate('home');await h.settle();assert.equal(h.requests.length,13);
-  assert.equal(h.document.body.dataset.bgmTrack,'home');assert.equal(h.document.body.dataset.bgmState,'playing');
+  h.navigate('home');await h.settle();assert.equal(h.requests.length,1);
+  assert.equal(h.document.body.dataset.bgmTrack,'twinkle');assert.equal(h.document.body.dataset.bgmState,'playing');
 });
-test('Rapid navigation and backgrounding cancel in-flight music',async()=>{
+test('Navigation preserves loading; backgrounding cancels stale playback',async()=>{
   const h=setup();h.start();h.navigate('animals');h.navigate('water');
-  h.requests[0].complete();h.requests[1].complete();await h.settle();assert.equal(h.sources.length,0);
-  h.document.hidden=true;h.events.visibilitychange();h.requests[2].complete();await h.settle();assert.equal(h.sources.length,0);
+  assert.equal(h.requests.length,1);
+  h.document.hidden=true;h.events.visibilitychange();h.requests[0].complete();await h.settle();assert.equal(h.sources.length,0);
   h.document.hidden=false;h.events.visibilitychange();await h.settle();assert.equal(h.sources.length,1);
-  assert.equal(h.document.body.dataset.bgmTrack,'water');
+  assert.equal(h.document.body.dataset.bgmTrack,'twinkle');
 });
 test('Music mute, global mute, zero volume and level changes control active source',async()=>{
   const h=setup();h.start();h.requests[0].complete();await h.settle();
@@ -70,8 +69,34 @@ test('Music stays at the selected level over time; piano keeps its quieter scree
   assert.equal(typeof h.context.duckMusic,'undefined');
   assert.equal(h.levels.at(-1),.35*.85*.6);
   h.context.audio.currentTime=2;h.context.syncMusic();assert.equal(h.levels.at(-1),.35*.85*.6);
-  h.navigate('piano');h.requests.at(-1).complete();await h.settle();
+  h.navigate('piano');await h.settle();
   assert.equal(h.levels.at(-1),.35*.85*.6*.4);
   h.preferences.enabled=false;h.context.syncMusic();
+});
+
+test('Song endings automatically play all ten, reshuffle, and never repeat immediately',async()=>{
+  const h=setup();h.start();h.requests[0].complete();await h.settle();
+  const titles=[];
+  for(let i=0;i<20;i++){
+    titles.push(h.document.body.dataset.bgmTrack);
+    assert.equal(h.sources.at(-1).loop,false);
+    h.sources.at(-1).onended();
+    h.requests.at(-1).complete();await h.settle();
+  }
+  assert.equal(new Set(titles.slice(0,10)).size,10);
+  assert.equal(new Set(titles.slice(10)).size,10);
+  for(let i=1;i<titles.length;i++)assert.notEqual(titles[i],titles[i-1]);
+  h.preferences.enabled=false;h.context.syncMusic();
+});
+
+test('Mute/background stop never advances; resume retains playback position',async()=>{
+  const h=setup();h.start();h.requests[0].complete();await h.settle();
+  h.context.audio.currentTime=8;h.document.hidden=true;h.events.visibilitychange();
+  assert.equal(h.document.body.dataset.bgmTrack,'twinkle');
+  h.document.hidden=false;h.events.visibilitychange();await h.settle();
+  assert.equal(h.sources.at(-1).offset,7);
+  const previous=h.sources.at(-1);
+  h.preferences.musicEnabled=false;h.context.syncMusic();previous.onended();
+  assert.equal(h.document.body.dataset.bgmTrack,'twinkle');assert.equal(h.requests.length,1);
 });
 
